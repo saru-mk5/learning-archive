@@ -705,9 +705,10 @@ h1{
   </div>
 
   <div class="secondary-filters">
+    <span class="dropdown-label">タグ</span>
     <div class="select-wrap">
       <select id="tagSelect">
-        <option value="">タグ：指定なし</option>
+        <option value="">指定なし</option>
       </select>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
@@ -1001,7 +1002,7 @@ function renderTagRow(){
   select.innerHTML = '';
   const defaultOpt = document.createElement('option');
   defaultOpt.value = '';
-  defaultOpt.textContent = 'タグ：指定なし';
+  defaultOpt.textContent = '指定なし';
   select.appendChild(defaultOpt);
   tags.forEach(tag=>{
     const opt = document.createElement('option');
