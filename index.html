@@ -529,12 +529,136 @@ h1{
 .toast.show{opacity:1;transform:translate(-50%,0);}
 
 :focus-visible{outline:2px solid var(--ink-light); outline-offset:2px;}
+
+/* ---------- auth screen ---------- */
+.auth-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:var(--bg-page);
+}
+.auth-screen[hidden]{display:none;}
+.auth-card{
+  width:100%;
+  max-width:360px;
+  background:var(--card-bg);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:28px 22px;
+}
+.auth-card h1{margin-bottom:6px;}
+.auth-sub{
+  font-size:12.5px;
+  color:var(--muted);
+  margin:0 0 20px;
+}
+.auth-tabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:18px;
+  background:rgba(255,255,255,0.06);
+  border-radius:10px;
+  padding:4px;
+}
+.auth-tab{
+  flex:1;
+  padding:8px 0;
+  border:none;
+  border-radius:8px;
+  background:transparent;
+  color:var(--muted);
+  font-family:var(--font-body);
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+.auth-tab.active{background:var(--ink-light);color:var(--on-accent);}
+.auth-card label{
+  display:block;
+  font-size:12.5px;
+  font-weight:700;
+  color:var(--muted);
+  margin-bottom:14px;
+}
+.auth-card input{
+  width:100%;
+  margin-top:5px;
+  font-family:var(--font-body);
+  font-size:14px;
+  padding:10px 11px;
+  border-radius:8px;
+  border:1.5px solid var(--line);
+  background:var(--input-bg);
+  color:var(--ink-light);
+  outline:none;
+}
+.auth-card input:focus{border-color:var(--ink-light);}
+.auth-message{
+  font-size:12.5px;
+  color:var(--danger);
+  margin:2px 0 14px;
+  min-height:1.4em;
+  line-height:1.5;
+}
+.auth-message.info{color:var(--muted);}
+
+.user-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:-4px 0 14px;
+}
+.user-email{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--muted);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.logout-btn{
+  flex:none;
+  font-family:var(--font-body);
+  font-size:11.5px;
+  color:var(--muted);
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:4px 11px;
+  cursor:pointer;
+}
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <h1>MY LEARNING ARCHIVE</h1>
+    <p class="auth-sub">ログインしてライブラリにアクセス</p>
+    <div class="auth-tabs" id="authTabs">
+      <button class="auth-tab active" data-mode="signin" type="button">ログイン</button>
+      <button class="auth-tab" data-mode="signup" type="button">新規登録</button>
+    </div>
+    <label>メールアドレス
+      <input type="email" id="authEmail" autocomplete="email">
+    </label>
+    <label>パスワード
+      <input type="password" id="authPassword" autocomplete="current-password">
+    </label>
+    <p class="auth-message" id="authMessage"></p>
+    <button class="btn-primary" id="authSubmitBtn" style="width:100%;" type="button">ログイン</button>
+  </div>
+</div>
+
+<div class="app" id="appRoot" hidden>
   <h1>MY LEARNING ARCHIVE</h1>
+  <div class="user-row">
+    <span class="user-email" id="userEmail"></span>
+    <button class="logout-btn" id="logoutBtn" type="button">ログアウト</button>
+  </div>
   <p class="stat-line" id="statLine">全 0 件</p>
 
   <div class="search-row">
@@ -564,7 +688,7 @@ h1{
   <p class="empty-state" id="emptyState" hidden></p>
 </div>
 
-<button class="fab" id="addBtn" aria-label="新規追加">
+<button class="fab" id="addBtn" aria-label="新規追加" hidden>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
 
@@ -619,9 +743,16 @@ h1{
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
 'use strict';
+
+/* ---------- Supabase setup ---------- */
+const SUPABASE_URL = 'https://derubnkgtxrixojrjtev.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcnVibmtndHhyaXhvanJqdGV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NTI1MzIsImV4cCI6MjA5OTMyODUzMn0.pS8TGNegTNXLwnm_nFztYtK2owYw0rwTlQxpYbrbk_k';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUserId = null;
 
 /* ---------- icons ---------- */
 const ICONS = {
@@ -644,7 +775,7 @@ const TYPE_META = {
 };
 
 /* ---------- state ---------- */
-let appData = { items: [], counters: { audio:0, video:0, youtube:0, article:0 } };
+let appData = { items: [] };
 let filterType = 'all';
 let filterTag = null;
 let filterCollection = null;
@@ -653,39 +784,100 @@ let searchQuery = '';
 let selectedType = 'audio';
 let editingId = null;
 
-/* ---------- storage ----------
-   Uses the browser's own localStorage so the app works fully standalone
-   once downloaded and opened outside of Claude (Safari / Chrome / home-screen). */
+/* ---------- data layer (Supabase) ---------- */
+function rowToItem(row){
+  return {
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    url: row.url,
+    collection: row.collection || '',
+    tags: row.tags || [],
+    notes: row.notes || '',
+    favorite: !!row.favorite,
+    catalogNo: row.catalog_no || '',
+    createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now()
+  };
+}
+
 async function loadData(){
   try{
-    const raw = localStorage.getItem('library-data');
-    if(raw){
-      const parsed = JSON.parse(raw);
-      if(parsed && Array.isArray(parsed.items)){
-        appData = parsed;
-        appData.counters = appData.counters || {audio:0,video:0,youtube:0,article:0};
-      }
-    }
+    const { data, error } = await sb.from('items').select('*').order('created_at', { ascending:false });
+    if(error) throw error;
+    appData.items = (data||[]).map(rowToItem);
   }catch(e){
-    /* no existing data yet, or storage unavailable (e.g. private browsing) */
+    appData.items = [];
+    showToast('データの読み込みに失敗しました');
   }
 }
-async function persist(){
+
+async function computeCatalogNo(type){
   try{
-    localStorage.setItem('library-data', JSON.stringify(appData));
+    const { count, error } = await sb.from('items').select('id', { count:'exact', head:true }).eq('type', type);
+    const n = (error || !count) ? 1 : count + 1;
+    return TYPE_META[type].prefix + '-' + String(n).padStart(3,'0');
   }catch(e){
-    showToast('保存に失敗しました。ブラウザの空き容量をご確認ください。');
+    return TYPE_META[type].prefix + '-001';
+  }
+}
+
+async function createItem(payload){
+  const catalogNo = await computeCatalogNo(payload.type);
+  const insertRow = {
+    user_id: currentUserId,
+    type: payload.type,
+    title: payload.title,
+    url: payload.url,
+    collection: payload.collection,
+    tags: payload.tags,
+    notes: payload.notes,
+    favorite: payload.favorite,
+    catalog_no: catalogNo
+  };
+  try{
+    const { data, error } = await sb.from('items').insert(insertRow).select().single();
+    if(error) throw error;
+    return rowToItem(data);
+  }catch(e){
+    showToast('保存に失敗しました');
+    return null;
+  }
+}
+
+async function updateItemRemote(id, patch){
+  try{
+    const { error } = await sb.from('items').update(patch).eq('id', id);
+    if(error) throw error;
+    return true;
+  }catch(e){
+    showToast('更新に失敗しました');
+    return false;
+  }
+}
+
+async function deleteItemRemote(id){
+  try{
+    const { error } = await sb.from('items').delete().eq('id', id);
+    if(error) throw error;
+    return true;
+  }catch(e){
+    showToast('削除に失敗しました');
+    return false;
+  }
+}
+
+async function deleteAllRemote(){
+  try{
+    const { error } = await sb.from('items').delete().eq('user_id', currentUserId);
+    if(error) throw error;
+    return true;
+  }catch(e){
+    showToast('削除に失敗しました');
+    return false;
   }
 }
 
 /* ---------- helpers ---------- */
-function genId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
-
-function nextCatalogNo(type){
-  appData.counters[type] = (appData.counters[type]||0) + 1;
-  return TYPE_META[type].prefix + '-' + String(appData.counters[type]).padStart(3,'0');
-}
-
 function getYouTubeId(url){
   try{
     const u = new URL(url);
@@ -832,10 +1024,10 @@ function buildCard(item){
   const starBtn = document.createElement('button');
   starBtn.className = 'star-btn';
   starBtn.innerHTML = ICONS.star(!!item.favorite);
-  starBtn.addEventListener('click', ()=>{
-    item.favorite = !item.favorite;
-    persist();
-    renderCards();
+  starBtn.addEventListener('click', async ()=>{
+    const newFav = !item.favorite;
+    const ok = await updateItemRemote(item.id, { favorite:newFav });
+    if(ok){ item.favorite = newFav; renderCards(); }
   });
   top.appendChild(cat);
   top.appendChild(starBtn);
@@ -951,13 +1143,15 @@ function buildCard(item){
   editBtn.addEventListener('click', ()=> openEditSheet(item));
   delBtn.addEventListener('click', ()=>{ confirmBox.hidden = false; });
   confirmBox.querySelector('.confirm-no').addEventListener('click', ()=>{ confirmBox.hidden = true; });
-  confirmBox.querySelector('.confirm-yes').addEventListener('click', ()=>{
-    appData.items = appData.items.filter(i=> i.id !== item.id);
-    persist();
-    renderTagRow();
-    renderFolderRow();
-    renderCards();
-    showToast('削除しました');
+  confirmBox.querySelector('.confirm-yes').addEventListener('click', async ()=>{
+    const ok = await deleteItemRemote(item.id);
+    if(ok){
+      appData.items = appData.items.filter(i=> i.id !== item.id);
+      renderTagRow();
+      renderFolderRow();
+      renderCards();
+      showToast('削除しました');
+    }
   });
 
   card.appendChild(top);
@@ -1084,7 +1278,7 @@ document.getElementById('addBtn').addEventListener('click', openAddSheet);
 document.getElementById('cancelBtn').addEventListener('click', closeSheet);
 overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeSheet(); });
 
-document.getElementById('saveBtn').addEventListener('click', ()=>{
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
   const title = fieldTitle.value.trim();
   const url = fieldUrl.value.trim();
   if(!title || !url){
@@ -1097,21 +1291,20 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
   const favorite = fieldFav.checked;
 
   if(editingId){
+    const ok = await updateItemRemote(editingId, {
+      title, url, collection, tags, notes, favorite, type: selectedType
+    });
+    if(!ok) return;
     const item = appData.items.find(i=> i.id === editingId);
     if(item){
       item.title = title; item.url = url; item.collection = collection;
       item.tags = tags; item.notes = notes; item.favorite = favorite; item.type = selectedType;
     }
   } else {
-    appData.items.push({
-      id: genId(),
-      type: selectedType,
-      title, url, collection, tags, notes, favorite,
-      catalogNo: nextCatalogNo(selectedType),
-      createdAt: Date.now()
-    });
+    const newItem = await createItem({ type: selectedType, title, url, collection, tags, notes, favorite });
+    if(!newItem) return;
+    appData.items.unshift(newItem);
   }
-  persist();
   closeSheet();
   renderTagRow();
   renderFolderRow();
@@ -1124,9 +1317,10 @@ const resetAllBtn = document.getElementById('resetAllBtn');
 const resetConfirm = document.getElementById('resetConfirm');
 resetAllBtn.addEventListener('click', ()=>{ resetConfirm.hidden = false; });
 document.getElementById('resetNo').addEventListener('click', ()=>{ resetConfirm.hidden = true; });
-document.getElementById('resetYes').addEventListener('click', ()=>{
-  appData = { items: [], counters: { audio:0, video:0, youtube:0, article:0 } };
-  persist();
+document.getElementById('resetYes').addEventListener('click', async ()=>{
+  const ok = await deleteAllRemote();
+  if(!ok) return;
+  appData.items = [];
   closeSheet();
   renderTagRow();
   renderFolderRow();
@@ -1156,12 +1350,91 @@ document.getElementById('searchInput').addEventListener('input', (e)=>{
   renderCards();
 });
 
-/* ---------- init ---------- */
-(async function init(){
+/* ---------- auth ---------- */
+const authScreen = document.getElementById('authScreen');
+const appRoot = document.getElementById('appRoot');
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const authMessage = document.getElementById('authMessage');
+const authSubmitBtn = document.getElementById('authSubmitBtn');
+let authMode = 'signin';
+
+function setAuthMessage(msg, isInfo){
+  authMessage.textContent = msg || '';
+  authMessage.classList.toggle('info', !!isInfo);
+}
+
+document.getElementById('authTabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.auth-tab');
+  if(!btn) return;
+  authMode = btn.dataset.mode;
+  Array.from(document.querySelectorAll('.auth-tab')).forEach(t=> t.classList.toggle('active', t===btn));
+  authSubmitBtn.textContent = authMode === 'signup' ? '新規登録' : 'ログイン';
+  setAuthMessage('');
+});
+
+authSubmitBtn.addEventListener('click', async ()=>{
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  if(!email || !password){
+    setAuthMessage('メールアドレスとパスワードを入力してください');
+    return;
+  }
+  authSubmitBtn.disabled = true;
+  setAuthMessage('');
+  try{
+    if(authMode === 'signup'){
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if(error) throw error;
+      if(!data.session){
+        setAuthMessage('確認メールを送りました。メール内のリンクをクリックしてからログインしてください。', true);
+      }
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+    }
+  }catch(e){
+    setAuthMessage(e.message || 'エラーが発生しました');
+  }finally{
+    authSubmitBtn.disabled = false;
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+});
+
+async function showLoggedIn(session){
+  currentUserId = session.user.id;
+  document.getElementById('userEmail').textContent = session.user.email || '';
+  authScreen.hidden = true;
+  appRoot.hidden = false;
+  document.getElementById('addBtn').hidden = false;
   await loadData();
   renderTagRow();
   renderFolderRow();
   renderCards();
+}
+
+function showLoggedOut(){
+  currentUserId = null;
+  appData.items = [];
+  appRoot.hidden = true;
+  document.getElementById('addBtn').hidden = true;
+  authScreen.hidden = false;
+  authEmail.value = '';
+  authPassword.value = '';
+  setAuthMessage('');
+}
+
+sb.auth.onAuthStateChange((_event, session)=>{
+  if(session){ showLoggedIn(session); } else { showLoggedOut(); }
+});
+
+/* ---------- init ---------- */
+(async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){ await showLoggedIn(session); } else { showLoggedOut(); }
 })();
 
 })();
