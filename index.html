@@ -625,37 +625,71 @@ h1{
 }
 .auth-message.info{color:var(--muted);}
 
-.user-row{
+.app-header-row{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
-  gap:8px;
-  margin:-4px 0 14px;
+  gap:10px;
 }
-.user-row-actions{
+.app-header-row h1{margin-bottom:6px;}
+.header-actions{
   flex:none;
   display:flex;
+  align-items:center;
   gap:6px;
+  margin-top:2px;
 }
-.user-email{
+.icon-only-btn{
+  flex:none;
+  width:32px;height:32px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--line);
+  color:var(--ink-light);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  padding:0;
+}
+.icon-only-btn svg{width:16px;height:16px;}
+.menu-wrap{position:relative;flex:none;}
+.dropdown-menu{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  background:var(--sheet-bg);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:8px;
+  min-width:190px;
+  z-index:30;
+  box-shadow:0 10px 28px rgba(0,0,0,0.5);
+}
+.dropdown-menu[hidden]{display:none;}
+.dropdown-email{
   font-family:var(--font-mono);
   font-size:11px;
   color:var(--muted);
+  padding:6px 9px 9px;
+  margin-bottom:4px;
+  border-bottom:1px solid var(--line);
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-.logout-btn{
-  flex:none;
+.dropdown-item{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:none;
+  border:none;
+  color:var(--ink-light);
   font-family:var(--font-body);
-  font-size:11.5px;
-  color:var(--muted);
-  background:rgba(255,255,255,0.06);
-  border:1px solid var(--line);
-  border-radius:999px;
-  padding:4px 11px;
+  font-size:13px;
+  padding:9px;
+  border-radius:8px;
   cursor:pointer;
 }
+.dropdown-item:hover{background:rgba(255,255,255,0.07);}
 </style>
 </head>
 <body>
@@ -680,12 +714,22 @@ h1{
 </div>
 
 <div class="app" id="appRoot" hidden>
-  <h1>LDM LEARNING ARCHIVE</h1>
-  <div class="user-row">
-    <span class="user-email" id="userEmail"></span>
-    <div class="user-row-actions">
-      <button class="logout-btn" id="accountBtn" type="button">アカウント設定</button>
-      <button class="logout-btn" id="logoutBtn" type="button">ログアウト</button>
+  <div class="app-header-row">
+    <h1>LDM LEARNING ARCHIVE</h1>
+    <div class="header-actions">
+      <button class="icon-only-btn" id="refreshBtn" type="button" aria-label="更新">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg>
+      </button>
+      <div class="menu-wrap">
+        <button class="icon-only-btn" id="menuBtn" type="button" aria-label="メニュー">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu" hidden>
+          <p class="dropdown-email" id="userEmail"></p>
+          <button class="dropdown-item" id="accountBtn" type="button">アカウント設定</button>
+          <button class="dropdown-item" id="logoutBtn" type="button">ログアウト</button>
+        </div>
+      </div>
     </div>
   </div>
   <p class="stat-line" id="statLine">全 0 件</p>
@@ -1508,13 +1552,30 @@ authSubmitBtn.addEventListener('click', async ()=>{
   }
 });
 
+document.getElementById('refreshBtn').addEventListener('click', ()=>{
+  window.location.reload();
+});
+
+const dropdownMenu = document.getElementById('dropdownMenu');
+document.getElementById('menuBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  dropdownMenu.hidden = !dropdownMenu.hidden;
+});
+document.addEventListener('click', (e)=>{
+  if(!dropdownMenu.hidden && !e.target.closest('.menu-wrap')){
+    dropdownMenu.hidden = true;
+  }
+});
+
 document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  dropdownMenu.hidden = true;
   await sb.auth.signOut();
 });
 
 /* ---------- account settings ---------- */
 const accountOverlay = document.getElementById('accountOverlay');
 document.getElementById('accountBtn').addEventListener('click', ()=>{
+  dropdownMenu.hidden = true;
   document.getElementById('newEmailField').value = '';
   document.getElementById('newPasswordField').value = '';
   document.getElementById('emailUpdateMsg').textContent = '';
@@ -1584,6 +1645,7 @@ function showLoggedOut(){
   appRoot.hidden = true;
   document.getElementById('addBtn').hidden = true;
   document.getElementById('accountOverlay').classList.remove('open');
+  document.getElementById('dropdownMenu').hidden = true;
   authScreen.hidden = false;
   authEmail.value = '';
   authPassword.value = '';
