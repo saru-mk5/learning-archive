@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>MY LEARNING ARCHIVE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+:root{
+  --bg-page:#000000;
+  --bg-app:#000000;
+  --card-bg:#161617;
+  --sheet-bg:#1C1C1E;
+  --input-bg:#0D0D0E;
+  --ink-light:#F2F2F2;
+  --muted:#8E8E93;
+  --line:rgba(255,255,255,0.10);
+  --on-accent:#0A0A0A;
+  --danger:#C24A3D;
+
+  --audio:#F2F2F2;
+  --video:#C7C7CC;
+  --youtube:#9A9A9E;
+  --article:#6E6E73;
+
+  --radius-card:14px;
+  --font-mono:'JetBrains Mono',monospace;
+  --font-body:'Noto Sans JP',sans-serif;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg-page);
+  font-family:var(--font-body);
+  color:var(--ink-light);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+}
+
+.app{
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  background:var(--bg-app);
+  position:relative;
+  padding:24px 18px 100px;
+}
+
+/* ---------- header ---------- */
+h1{
+  font-family:var(--font-mono);
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin:0 0 6px;
+  color:var(--ink-light);
+}
+.stat-line{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--muted);
+  margin:0 0 18px;
+}
+
+.search-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px 12px;
+  margin-bottom:16px;
+}
+.search-row svg{flex:none;color:var(--muted);}
+.search-row input{
+  flex:1;
+  background:none;
+  border:none;
+  outline:none;
+  color:var(--ink-light);
+  font-family:var(--font-body);
+  font-size:14px;
+}
+.search-row input::placeholder{color:var(--muted);}
+
+/* ---------- tabs ---------- */
+.type-tabs{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  padding-bottom:4px;
+  margin-bottom:10px;
+  scrollbar-width:none;
+}
+.type-tabs::-webkit-scrollbar{display:none;}
+.tab{
+  flex:none;
+  font-family:var(--font-body);
+  font-size:13px;
+  font-weight:500;
+  color:var(--ink-light);
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:7px 14px;
+  cursor:pointer;
+  transition:background .15s ease, color .15s ease, border-color .15s ease;
+  white-space:nowrap;
+}
+.tab.active{
+  color:var(--on-accent);
+  border-color:transparent;
+}
+.tab[data-type="all"].active{background:var(--ink-light);}
+.tab[data-type="audio"].active{background:var(--audio);}
+.tab[data-type="video"].active{background:var(--video);}
+.tab[data-type="youtube"].active{background:var(--youtube);}
+.tab[data-type="article"].active{background:var(--article);}
+
+/* ---------- chip rows (folders / tags) ---------- */
+.chip-row{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  margin-bottom:8px;
+}
+.chip-row::-webkit-scrollbar{display:none;}
+.chip-row[hidden]{display:none;}
+.chip{
+  flex:none;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--muted);
+  background:transparent;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:5px 10px;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .15s ease;
+}
+.chip svg{width:12px;height:12px;flex:none;}
+.chip.active{
+  color:var(--on-accent);
+  background:var(--ink-light);
+  border-color:transparent;
+}
+
+.secondary-filters{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:18px;
+}
+.secondary-filters .chip-row{flex:1;margin-bottom:0;}
+.fav-toggle{
+  flex:none;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  background:transparent;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:5px 10px;
+  color:var(--muted);
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.fav-toggle svg{width:13px;height:13px;}
+.fav-toggle.active{
+  color:var(--on-accent);
+  background:var(--ink-light);
+  border-color:transparent;
+}
+
+/* ---------- cards ---------- */
+.card-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.empty-state{
+  color:var(--muted);
+  font-size:13.5px;
+  line-height:1.7;
+  text-align:center;
+  padding:60px 10px;
+}
+
+.card{
+  background:var(--card-bg);
+  color:var(--ink-light);
+  border:1px solid var(--line);
+  border-radius:var(--radius-card);
+  padding:14px 14px 12px;
+  animation:cardIn .35s ease both;
+}
+@keyframes cardIn{
+  from{opacity:0; transform:translateY(6px);}
+  to{opacity:1; transform:translateY(0);}
+}
+@media (prefers-reduced-motion:reduce){
+  .card{animation:none;}
+  .tab,.chip,.fav-toggle,.fab,.sheet,.sheet-overlay{transition:none !important;}
+}
+
+.card-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:8px;
+}
+.catalog-no{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.03em;
+  border:1px dashed var(--accent);
+  color:var(--accent);
+  border-radius:5px;
+  padding:2px 7px;
+  transform:rotate(-1.4deg);
+  display:inline-block;
+}
+.star-btn{
+  background:none;
+  border:none;
+  padding:2px;
+  cursor:pointer;
+  color:var(--accent);
+  line-height:0;
+}
+.star-btn svg{width:19px;height:19px;}
+
+.card-body{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.card-icon{
+  flex:none;
+  width:42px;height:42px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+  overflow:hidden;
+}
+.card-icon svg{width:22px;height:22px;}
+.card-icon img{width:100%;height:100%;object-fit:cover;}
+
+.card-folder{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+.card-folder svg{width:11px;height:11px;}
+
+.card-title{
+  font-size:15px;
+  font-weight:700;
+  margin:0 0 4px;
+  line-height:1.4;
+}
+.card-notes{
+  font-size:12.5px;
+  color:var(--muted);
+  margin:0 0 6px;
+  line-height:1.6;
+}
+.card-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+.card-tag{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  background:rgba(255,255,255,0.08);
+  border-radius:999px;
+  padding:3px 8px;
+  color:var(--muted);
+}
+
+.card-actions{
+  display:flex;
+  gap:8px;
+  margin-top:11px;
+  border-top:1px solid var(--line);
+  padding-top:10px;
+}
+.card-actions button{
+  font-family:var(--font-body);
+  font-size:12.5px;
+  border:none;
+  cursor:pointer;
+  border-radius:8px;
+  display:flex;align-items:center;gap:5px;
+  padding:7px 10px;
+}
+.open-btn{
+  background:var(--accent);
+  color:var(--on-accent);
+  font-weight:700;
+  flex:1;
+  justify-content:center;
+}
+.icon-btn{
+  background:rgba(255,255,255,0.08);
+  color:var(--ink-light);
+  padding:7px 9px !important;
+}
+.icon-btn svg,.open-btn svg{width:15px;height:15px;}
+
+.card-player{
+  margin-top:10px;
+  border-radius:10px;
+  overflow:hidden;
+  background:#000;
+}
+.card-player iframe,.card-player video{
+  width:100%;
+  aspect-ratio:16/9;
+  border:none;
+  display:block;
+}
+.card-player audio{width:100%;display:block;padding:10px;background:#000;}
+
+.card-confirm{
+  margin-top:10px;
+  padding:10px;
+  background:rgba(194,74,61,0.12);
+  border-radius:10px;
+  font-size:12.5px;
+}
+.card-confirm p{margin:0 0 8px;font-weight:700;color:var(--danger);}
+.card-confirm .row{display:flex;gap:8px;}
+.card-confirm button{
+  flex:1;
+  border:none;
+  border-radius:7px;
+  padding:7px 0;
+  font-size:12px;
+  cursor:pointer;
+  font-weight:700;
+}
+.confirm-yes{background:var(--danger);color:#fff;}
+.confirm-no{background:rgba(255,255,255,0.08);color:var(--ink-light);}
+
+/* ---------- fab ---------- */
+.fab{
+  position:fixed;
+  bottom:28px;
+  left:50%;
+  transform:translateX(calc(-50% + 190px));
+  width:54px;height:54px;
+  border-radius:50%;
+  background:var(--ink-light);
+  color:var(--on-accent);
+  border:none;
+  box-shadow:0 6px 18px rgba(0,0,0,0.6);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s ease;
+}
+.fab:active{transform:translateX(calc(-50% + 190px)) scale(.92);}
+.fab svg{width:24px;height:24px;}
+@media (max-width:480px){
+  .fab{left:auto;right:22px;transform:none;}
+  .fab:active{transform:scale(.92);}
+}
+
+/* ---------- sheet ---------- */
+.sheet-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.6);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s ease;
+  z-index:20;
+}
+.sheet-overlay.open{opacity:1;pointer-events:auto;}
+.sheet{
+  width:100%;max-width:480px;
+  max-height:88vh;
+  overflow-y:auto;
+  background:var(--sheet-bg);
+  color:var(--ink-light);
+  border-radius:20px 20px 0 0;
+  padding:10px 20px 26px;
+  transform:translateY(100%);
+  transition:transform .25s ease;
+  border-top:1px solid var(--line);
+}
+.sheet-overlay.open .sheet{transform:translateY(0);}
+.sheet-handle{
+  width:38px;height:4px;
+  background:rgba(255,255,255,0.2);
+  border-radius:4px;
+  margin:6px auto 14px;
+}
+.sheet h2{font-size:17px;margin:0 0 14px;font-weight:700;}
+
+.type-select{
+  display:flex;gap:6px;margin-bottom:14px;
+  flex-wrap:wrap;
+}
+.type-select button{
+  flex:1 1 auto;
+  font-family:var(--font-body);
+  font-size:12.5px;
+  padding:9px 6px;
+  border-radius:9px;
+  border:1.5px solid var(--line);
+  background:transparent;
+  color:var(--ink-light);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.type-select button svg{width:14px;height:14px;}
+.type-select button.active{color:var(--on-accent);border-color:transparent;}
+.type-select button[data-type="audio"].active{background:var(--audio);}
+.type-select button[data-type="video"].active{background:var(--video);}
+.type-select button[data-type="youtube"].active{background:var(--youtube);}
+.type-select button[data-type="article"].active{background:var(--article);}
+
+.sheet label{
+  display:block;
+  font-size:12.5px;
+  font-weight:700;
+  color:var(--muted);
+  margin-bottom:12px;
+}
+.sheet input[type="text"],.sheet input:not([type]),.sheet textarea{
+  width:100%;
+  margin-top:5px;
+  font-family:var(--font-body);
+  font-size:14px;
+  padding:9px 11px;
+  border-radius:8px;
+  border:1.5px solid var(--line);
+  background:var(--input-bg);
+  color:var(--ink-light);
+  outline:none;
+}
+.sheet input::placeholder,.sheet textarea::placeholder{color:var(--muted);}
+.sheet input:focus,.sheet textarea:focus{border-color:var(--ink-light);}
+.field-hint{
+  font-weight:400;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px;
+  line-height:1.5;
+}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-weight:500;color:var(--ink-light);}
+.checkbox-row input{width:auto;margin:0;}
+
+.sheet-actions{
+  display:flex;gap:10px;
+  margin-top:6px;
+}
+.sheet-actions button{
+  flex:1;
+  padding:12px 0;
+  border-radius:10px;
+  border:none;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn-secondary{background:rgba(255,255,255,0.08);color:var(--ink-light);}
+.btn-primary{background:var(--ink-light);color:var(--on-accent);}
+
+.reset-link{
+  display:block;
+  margin:22px auto 0;
+  background:none;border:none;
+  color:var(--danger);
+  font-size:12px;
+  text-decoration:underline;
+  cursor:pointer;
+}
+.reset-confirm{
+  margin-top:14px;
+  padding:12px;
+  background:rgba(194,74,61,0.12);
+  border-radius:10px;
+  text-align:center;
+  font-size:12.5px;
+}
+.reset-confirm p{margin:0 0 10px;font-weight:700;color:var(--danger);}
+.reset-confirm .row{display:flex;gap:8px;}
+.reset-confirm button{
+  flex:1;border:none;border-radius:8px;padding:9px 0;font-weight:700;font-size:12.5px;cursor:pointer;
+}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;
+  bottom:28px;left:50%;
+  transform:translate(-50%,20px);
+  background:var(--ink-light);
+  color:var(--on-accent);
+  padding:10px 18px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:500;
+  opacity:0;
+  pointer-events:none;
+  transition:all .25s ease;
+  z-index:40;
+  white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+:focus-visible{outline:2px solid var(--ink-light); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <h1>MY LEARNING ARCHIVE</h1>
+  <p class="stat-line" id="statLine">全 0 件</p>
+
+  <div class="search-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.2" y2="16.2"/></svg>
+    <input id="searchInput" type="text" placeholder="タイトル・タグで検索">
+  </div>
+
+  <nav class="type-tabs" id="typeTabs">
+    <button class="tab active" data-type="all">すべて</button>
+    <button class="tab" data-type="audio">オーディオ</button>
+    <button class="tab" data-type="video">動画</button>
+    <button class="tab" data-type="youtube">YouTube</button>
+    <button class="tab" data-type="article">記事・サイト</button>
+  </nav>
+
+  <div class="chip-row" id="folderRow" hidden></div>
+
+  <div class="secondary-filters">
+    <div class="chip-row" id="tagRow"></div>
+    <button class="fav-toggle" id="favToggle">
+      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"><path d="M12 3.5 L14.7 9.1 L21 10 L16.5 14.2 L17.6 20.4 L12 17.3 L6.4 20.4 L7.5 14.2 L3 10 L9.3 9.1 Z"/></svg>
+      お気に入り
+    </button>
+  </div>
+
+  <main class="card-list" id="cardList"></main>
+  <p class="empty-state" id="emptyState" hidden></p>
+</div>
+
+<button class="fab" id="addBtn" aria-label="新規追加">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<div class="sheet-overlay" id="sheetOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="sheetTitle">新しく登録</h2>
+
+    <div class="type-select" id="typeSelect">
+      <button data-type="audio" type="button"></button>
+      <button data-type="video" type="button"></button>
+      <button data-type="youtube" type="button"></button>
+      <button data-type="article" type="button"></button>
+    </div>
+
+    <label>タイトル
+      <input type="text" id="fieldTitle" placeholder="例）自己啓発本の要約ラジオ 第12回">
+    </label>
+    <label>URL
+      <input type="text" id="fieldUrl" placeholder="https://...">
+      <span class="field-hint">音声・動画はGoogle DriveのリンクでOK。共有設定を「リンクを知っている全員が閲覧可」にしてください。</span>
+    </label>
+    <label>フォルダ／リスト（任意）
+      <input type="text" id="fieldCollection" placeholder="例）〇〇セミナー">
+      <span class="field-hint">同じ名前を付けると、その名前を選んだときにまとめて一覧表示されます。</span>
+    </label>
+    <label>タグ（カンマ区切り）
+      <input type="text" id="fieldTags" placeholder="例）広告運用, 筋トレ, ビジネス書">
+    </label>
+    <label>メモ（任意）
+      <textarea id="fieldNotes" rows="2" placeholder="何のためにこれを残したか、あとで見返すヒント"></textarea>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" id="fieldFav"> お気に入りに追加
+    </label>
+
+    <div class="sheet-actions">
+      <button class="btn-secondary" id="cancelBtn" type="button">キャンセル</button>
+      <button class="btn-primary" id="saveBtn" type="button">保存</button>
+    </div>
+
+    <button class="reset-link" id="resetAllBtn" type="button">すべてのデータを削除</button>
+    <div class="reset-confirm" id="resetConfirm" hidden>
+      <p>全アイテムを完全に削除します。よろしいですか？</p>
+      <div class="row">
+        <button id="resetNo" style="background:rgba(255,255,255,0.08);color:var(--ink-light);">やめる</button>
+        <button id="resetYes" style="background:var(--danger);color:#fff;">削除する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- icons ---------- */
+const ICONS = {
+  audio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="1.5"/><circle cx="8.5" cy="12" r="2.2"/><circle cx="15.5" cy="12" r="2.2"/><line x1="8.7" y1="16.3" x2="15.3" y2="16.3"/></svg>',
+  video:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.4 L4.2 5.4 L20 5.4 L21 9.4 Z"/><rect x="3" y="9.4" width="18" height="9.2" rx="1"/><line x1="7" y1="5.6" x2="9" y2="9.2"/><line x1="12" y1="5.5" x2="14" y2="9.2"/><line x1="17" y1="5.5" x2="19" y2="9.2"/></svg>',
+  youtube:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 8.6 L15.6 12 L10 15.4 Z" fill="currentColor" stroke="none"/></svg>',
+  article:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 H18 V20.5 L12 16.5 L6 20.5 Z"/></svg>',
+  folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.5 A1 1 0 0 1 4.5 5.5 H9 L10.5 7.5 H19.5 A1 1 0 0 1 20.5 8.5 V17.5 A1 1 0 0 1 19.5 18.5 H4.5 A1 1 0 0 1 3.5 17.5 Z"/></svg>',
+  star:(filled)=>'<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="'+(filled?'currentColor':'none')+'"><path d="M12 3.5 L14.7 9.1 L21 10 L16.5 14.2 L17.6 20.4 L12 17.3 L6.4 20.4 L7.5 14.2 L3 10 L9.3 9.1 Z"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5 L18.5 12 L8 18.5 Z" fill="currentColor" stroke="none"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 L4.6 16.8 L15.5 5.9 A2 2 0 0 1 18.3 5.9 L18.4 6 A2 2 0 0 1 18.4 8.8 L7.4 19.7 Z"/><line x1="14" y1="7.6" x2="16.6" y2="10.2"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><path d="M6 7 L7 20 H17 L18 7"/><path d="M9.5 7 V4.5 H14.5 V7"/><line x1="10" y1="10.5" x2="10" y2="16.5"/><line x1="14" y1="10.5" x2="14" y2="16.5"/></svg>'
+};
+
+const TYPE_META = {
+  audio:{label:'オーディオ', accent:'var(--audio)', prefix:'A', icon:ICONS.audio},
+  video:{label:'動画', accent:'var(--video)', prefix:'V', icon:ICONS.video},
+  youtube:{label:'YouTube', accent:'var(--youtube)', prefix:'Y', icon:ICONS.youtube},
+  article:{label:'記事・サイト', accent:'var(--article)', prefix:'S', icon:ICONS.article}
+};
+
+/* ---------- state ---------- */
+let appData = { items: [], counters: { audio:0, video:0, youtube:0, article:0 } };
+let filterType = 'all';
+let filterTag = null;
+let filterCollection = null;
+let filterFavOnly = false;
+let searchQuery = '';
+let selectedType = 'audio';
+let editingId = null;
+
+/* ---------- storage ----------
+   Uses the browser's own localStorage so the app works fully standalone
+   once downloaded and opened outside of Claude (Safari / Chrome / home-screen). */
+async function loadData(){
+  try{
+    const raw = localStorage.getItem('library-data');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && Array.isArray(parsed.items)){
+        appData = parsed;
+        appData.counters = appData.counters || {audio:0,video:0,youtube:0,article:0};
+      }
+    }
+  }catch(e){
+    /* no existing data yet, or storage unavailable (e.g. private browsing) */
+  }
+}
+async function persist(){
+  try{
+    localStorage.setItem('library-data', JSON.stringify(appData));
+  }catch(e){
+    showToast('保存に失敗しました。ブラウザの空き容量をご確認ください。');
+  }
+}
+
+/* ---------- helpers ---------- */
+function genId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+function nextCatalogNo(type){
+  appData.counters[type] = (appData.counters[type]||0) + 1;
+  return TYPE_META[type].prefix + '-' + String(appData.counters[type]).padStart(3,'0');
+}
+
+function getYouTubeId(url){
+  try{
+    const u = new URL(url);
+    if(u.hostname.includes('youtu.be')) return u.pathname.slice(1) || null;
+    if(u.hostname.includes('youtube.com')){
+      if(u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2] || null;
+      if(u.pathname.startsWith('/embed/')) return u.pathname.split('/')[2] || null;
+      const v = u.searchParams.get('v');
+      if(v) return v;
+    }
+  }catch(e){}
+  return null;
+}
+function getDriveId(url){
+  const m = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+function getHostname(url){
+  try{ return new URL(url).hostname; }catch(e){ return null; }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+/* ---------- rendering ---------- */
+function getAllTags(scopeType){
+  const set = new Set();
+  appData.items.forEach(it=>{
+    if(scopeType !== 'all' && it.type !== scopeType) return;
+    (it.tags||[]).forEach(t=> set.add(t));
+  });
+  return Array.from(set);
+}
+function getAllCollections(scopeType){
+  const set = new Set();
+  appData.items.forEach(it=>{
+    if(scopeType !== 'all' && it.type !== scopeType) return;
+    if(it.collection) set.add(it.collection);
+  });
+  return Array.from(set);
+}
+
+function renderTagRow(){
+  const row = document.getElementById('tagRow');
+  row.innerHTML = '';
+  const tags = getAllTags(filterType);
+  if(tags.indexOf(filterTag) === -1) filterTag = null;
+  tags.forEach(tag=>{
+    const btn = document.createElement('button');
+    btn.className = 'chip' + (filterTag === tag ? ' active' : '');
+    const label = document.createElement('span');
+    label.textContent = '#' + tag;
+    btn.appendChild(label);
+    btn.addEventListener('click', ()=>{
+      filterTag = (filterTag === tag) ? null : tag;
+      renderTagRow();
+      renderCards();
+    });
+    row.appendChild(btn);
+  });
+}
+
+function renderFolderRow(){
+  const row = document.getElementById('folderRow');
+  row.innerHTML = '';
+  const cols = getAllCollections(filterType);
+  if(cols.indexOf(filterCollection) === -1) filterCollection = null;
+  row.hidden = cols.length === 0;
+  cols.forEach(name=>{
+    const btn = document.createElement('button');
+    btn.className = 'chip' + (filterCollection === name ? ' active' : '');
+    const iconSpan = document.createElement('span');
+    iconSpan.innerHTML = ICONS.folder;
+    iconSpan.style.display = 'inline-flex';
+    const label = document.createElement('span');
+    label.textContent = name;
+    btn.appendChild(iconSpan);
+    btn.appendChild(label);
+    btn.addEventListener('click', ()=>{
+      filterCollection = (filterCollection === name) ? null : name;
+      renderFolderRow();
+      renderCards();
+    });
+    row.appendChild(btn);
+  });
+}
+
+function getFilteredItems(){
+  return appData.items.filter(it=>{
+    if(filterType !== 'all' && it.type !== filterType) return false;
+    if(filterFavOnly && !it.favorite) return false;
+    if(filterTag && (!it.tags || it.tags.indexOf(filterTag) === -1)) return false;
+    if(filterCollection && it.collection !== filterCollection) return false;
+    if(searchQuery){
+      const q = searchQuery.toLowerCase();
+      const inTitle = it.title.toLowerCase().includes(q);
+      const inTags = (it.tags||[]).some(t=> t.toLowerCase().includes(q));
+      if(!inTitle && !inTags) return false;
+    }
+    return true;
+  }).sort((a,b)=> b.createdAt - a.createdAt);
+}
+
+function renderStatLine(){
+  const total = appData.items.length;
+  const favs = appData.items.filter(i=>i.favorite).length;
+  document.getElementById('statLine').textContent = '全 ' + total + ' 件 ・ お気に入り ' + favs + ' 件';
+}
+
+function renderCards(){
+  const list = getFilteredItems();
+  const container = document.getElementById('cardList');
+  const empty = document.getElementById('emptyState');
+  container.innerHTML = '';
+
+  if(list.length === 0){
+    empty.hidden = false;
+    empty.innerHTML = appData.items.length === 0
+      ? 'まだ何も登録されていません。<br>右下の＋から最初のアイテムを追加しましょう。'
+      : '条件に一致するアイテムはありません。';
+  } else {
+    empty.hidden = true;
+    list.forEach(item=> container.appendChild(buildCard(item)));
+  }
+  renderStatLine();
+}
+
+function buildCard(item){
+  const meta = TYPE_META[item.type] || TYPE_META.article;
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.style.setProperty('--accent', meta.accent);
+
+  const top = document.createElement('div');
+  top.className = 'card-top';
+  const cat = document.createElement('span');
+  cat.className = 'catalog-no';
+  cat.textContent = item.catalogNo || '';
+  const starBtn = document.createElement('button');
+  starBtn.className = 'star-btn';
+  starBtn.innerHTML = ICONS.star(!!item.favorite);
+  starBtn.addEventListener('click', ()=>{
+    item.favorite = !item.favorite;
+    persist();
+    renderCards();
+  });
+  top.appendChild(cat);
+  top.appendChild(starBtn);
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  const iconWrap = document.createElement('div');
+  iconWrap.className = 'card-icon';
+  if(item.type === 'youtube'){
+    const ytId = getYouTubeId(item.url);
+    if(ytId){
+      const img = document.createElement('img');
+      img.src = 'https://img.youtube.com/vi/' + ytId + '/mqdefault.jpg';
+      img.alt = '';
+      img.onerror = ()=>{ iconWrap.innerHTML = meta.icon; };
+      iconWrap.appendChild(img);
+    } else {
+      iconWrap.innerHTML = meta.icon;
+    }
+  } else if(item.type === 'article'){
+    const host = getHostname(item.url);
+    if(host){
+      const img = document.createElement('img');
+      img.src = 'https://www.google.com/s2/favicons?sz=64&domain=' + encodeURIComponent(host);
+      img.alt = '';
+      img.style.objectFit = 'contain';
+      img.style.padding = '9px';
+      img.onerror = ()=>{ iconWrap.innerHTML = meta.icon; };
+      iconWrap.appendChild(img);
+    } else {
+      iconWrap.innerHTML = meta.icon;
+    }
+  } else {
+    iconWrap.innerHTML = meta.icon;
+  }
+
+  const textWrap = document.createElement('div');
+  textWrap.style.flex = '1';
+  textWrap.style.minWidth = '0';
+
+  if(item.collection){
+    const folderTag = document.createElement('div');
+    folderTag.className = 'card-folder';
+    const fIcon = document.createElement('span');
+    fIcon.innerHTML = ICONS.folder;
+    fIcon.style.display = 'inline-flex';
+    const fLabel = document.createElement('span');
+    fLabel.textContent = item.collection;
+    folderTag.appendChild(fIcon);
+    folderTag.appendChild(fLabel);
+    textWrap.appendChild(folderTag);
+  }
+
+  const title = document.createElement('h3');
+  title.className = 'card-title';
+  title.textContent = item.title;
+  textWrap.appendChild(title);
+
+  if(item.notes){
+    const notes = document.createElement('p');
+    notes.className = 'card-notes';
+    notes.textContent = item.notes;
+    textWrap.appendChild(notes);
+  }
+
+  if(item.tags && item.tags.length){
+    const tagsWrap = document.createElement('div');
+    tagsWrap.className = 'card-tags';
+    item.tags.forEach(t=>{
+      const chip = document.createElement('span');
+      chip.className = 'card-tag';
+      chip.textContent = '#' + t;
+      tagsWrap.appendChild(chip);
+    });
+    textWrap.appendChild(tagsWrap);
+  }
+
+  body.appendChild(iconWrap);
+  body.appendChild(textWrap);
+
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+
+  const openBtn = document.createElement('button');
+  openBtn.className = 'open-btn';
+  openBtn.innerHTML = ICONS.play + '<span>開く</span>';
+
+  const editBtn = document.createElement('button');
+  editBtn.className = 'icon-btn';
+  editBtn.innerHTML = ICONS.edit;
+  editBtn.setAttribute('aria-label','編集');
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'icon-btn';
+  delBtn.innerHTML = ICONS.trash;
+  delBtn.setAttribute('aria-label','削除');
+
+  actions.appendChild(openBtn);
+  actions.appendChild(editBtn);
+  actions.appendChild(delBtn);
+
+  const player = document.createElement('div');
+  player.className = 'card-player';
+  player.hidden = true;
+
+  const confirmBox = document.createElement('div');
+  confirmBox.className = 'card-confirm';
+  confirmBox.hidden = true;
+  confirmBox.innerHTML = '<p>削除しますか？</p><div class="row"><button class="confirm-yes">削除する</button><button class="confirm-no">やめる</button></div>';
+
+  openBtn.addEventListener('click', ()=> togglePlayer(item, player));
+  editBtn.addEventListener('click', ()=> openEditSheet(item));
+  delBtn.addEventListener('click', ()=>{ confirmBox.hidden = false; });
+  confirmBox.querySelector('.confirm-no').addEventListener('click', ()=>{ confirmBox.hidden = true; });
+  confirmBox.querySelector('.confirm-yes').addEventListener('click', ()=>{
+    appData.items = appData.items.filter(i=> i.id !== item.id);
+    persist();
+    renderTagRow();
+    renderFolderRow();
+    renderCards();
+    showToast('削除しました');
+  });
+
+  card.appendChild(top);
+  card.appendChild(body);
+  card.appendChild(actions);
+  card.appendChild(player);
+  card.appendChild(confirmBox);
+  return card;
+}
+
+function togglePlayer(item, playerEl){
+  if(!playerEl.hidden){
+    playerEl.hidden = true;
+    playerEl.innerHTML = '';
+    return;
+  }
+  playerEl.innerHTML = '';
+
+  if(item.type === 'youtube'){
+    const id = getYouTubeId(item.url);
+    if(id){
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+      iframe.allowFullscreen = true;
+      playerEl.appendChild(iframe);
+      playerEl.hidden = false;
+      return;
+    }
+    window.open(item.url, '_blank', 'noopener');
+    return;
+  }
+
+  const driveId = getDriveId(item.url);
+  if(driveId){
+    const iframe = document.createElement('iframe');
+    iframe.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+    iframe.allow = 'autoplay';
+    playerEl.appendChild(iframe);
+    playerEl.hidden = false;
+    return;
+  }
+
+  if(item.type === 'audio'){
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.autoplay = true;
+    audio.src = item.url;
+    audio.onerror = ()=>{ window.open(item.url, '_blank', 'noopener'); };
+    playerEl.appendChild(audio);
+    playerEl.hidden = false;
+    return;
+  }
+  if(item.type === 'video'){
+    const video = document.createElement('video');
+    video.controls = true;
+    video.autoplay = true;
+    video.src = item.url;
+    video.onerror = ()=>{ window.open(item.url, '_blank', 'noopener'); };
+    playerEl.appendChild(video);
+    playerEl.hidden = false;
+    return;
+  }
+
+  window.open(item.url, '_blank', 'noopener');
+}
+
+/* ---------- sheet (add / edit) ---------- */
+const overlay = document.getElementById('sheetOverlay');
+const sheetTitleEl = document.getElementById('sheetTitle');
+const fieldTitle = document.getElementById('fieldTitle');
+const fieldUrl = document.getElementById('fieldUrl');
+const fieldCollection = document.getElementById('fieldCollection');
+const fieldTags = document.getElementById('fieldTags');
+const fieldNotes = document.getElementById('fieldNotes');
+const fieldFav = document.getElementById('fieldFav');
+
+function renderTypeSelect(){
+  const wrap = document.getElementById('typeSelect');
+  Array.from(wrap.children).forEach(btn=>{
+    const t = btn.dataset.type;
+    btn.innerHTML = TYPE_META[t].icon + '<span>' + TYPE_META[t].label + '</span>';
+    btn.classList.toggle('active', t === selectedType);
+    btn.onclick = ()=>{ selectedType = t; renderTypeSelect(); };
+  });
+}
+
+function resetForm(){
+  selectedType = 'audio';
+  fieldTitle.value = '';
+  fieldUrl.value = '';
+  fieldCollection.value = '';
+  fieldTags.value = '';
+  fieldNotes.value = '';
+  fieldFav.checked = false;
+  renderTypeSelect();
+}
+
+function openAddSheet(){
+  editingId = null;
+  resetForm();
+  sheetTitleEl.textContent = '新しく登録';
+  overlay.classList.add('open');
+}
+function openEditSheet(item){
+  editingId = item.id;
+  selectedType = item.type;
+  fieldTitle.value = item.title;
+  fieldUrl.value = item.url;
+  fieldCollection.value = item.collection || '';
+  fieldTags.value = (item.tags||[]).join(', ');
+  fieldNotes.value = item.notes || '';
+  fieldFav.checked = !!item.favorite;
+  renderTypeSelect();
+  sheetTitleEl.textContent = '登録内容を編集';
+  overlay.classList.add('open');
+}
+function closeSheet(){
+  overlay.classList.remove('open');
+  document.getElementById('resetConfirm').hidden = true;
+}
+
+document.getElementById('addBtn').addEventListener('click', openAddSheet);
+document.getElementById('cancelBtn').addEventListener('click', closeSheet);
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeSheet(); });
+
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  const title = fieldTitle.value.trim();
+  const url = fieldUrl.value.trim();
+  if(!title || !url){
+    showToast('タイトルとURLを入力してください');
+    return;
+  }
+  const collection = fieldCollection.value.trim();
+  const tags = fieldTags.value.split(',').map(s=>s.trim()).filter(Boolean);
+  const notes = fieldNotes.value.trim();
+  const favorite = fieldFav.checked;
+
+  if(editingId){
+    const item = appData.items.find(i=> i.id === editingId);
+    if(item){
+      item.title = title; item.url = url; item.collection = collection;
+      item.tags = tags; item.notes = notes; item.favorite = favorite; item.type = selectedType;
+    }
+  } else {
+    appData.items.push({
+      id: genId(),
+      type: selectedType,
+      title, url, collection, tags, notes, favorite,
+      catalogNo: nextCatalogNo(selectedType),
+      createdAt: Date.now()
+    });
+  }
+  persist();
+  closeSheet();
+  renderTagRow();
+  renderFolderRow();
+  renderCards();
+  showToast('保存しました');
+});
+
+/* reset all */
+const resetAllBtn = document.getElementById('resetAllBtn');
+const resetConfirm = document.getElementById('resetConfirm');
+resetAllBtn.addEventListener('click', ()=>{ resetConfirm.hidden = false; });
+document.getElementById('resetNo').addEventListener('click', ()=>{ resetConfirm.hidden = true; });
+document.getElementById('resetYes').addEventListener('click', ()=>{
+  appData = { items: [], counters: { audio:0, video:0, youtube:0, article:0 } };
+  persist();
+  closeSheet();
+  renderTagRow();
+  renderFolderRow();
+  renderCards();
+  showToast('すべて削除しました');
+});
+
+/* ---------- top-level filters ---------- */
+document.getElementById('typeTabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.tab');
+  if(!btn) return;
+  filterType = btn.dataset.type;
+  Array.from(document.querySelectorAll('.tab')).forEach(t=> t.classList.toggle('active', t === btn));
+  renderTagRow();
+  renderFolderRow();
+  renderCards();
+});
+
+document.getElementById('favToggle').addEventListener('click', function(){
+  filterFavOnly = !filterFavOnly;
+  this.classList.toggle('active', filterFavOnly);
+  renderCards();
+});
+
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  searchQuery = e.target.value;
+  renderCards();
+});
+
+/* ---------- init ---------- */
+(async function init(){
+  await loadData();
+  renderTagRow();
+  renderFolderRow();
+  renderCards();
+})();
+
+})();
+</script>
+</body>
+</html>
