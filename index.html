@@ -237,9 +237,26 @@ h1{
 .card-top{
   display:flex;
   justify-content:space-between;
-  align-items:flex-start;
-  margin-bottom:5px;
+  align-items:center;
+  margin-bottom:7px;
 }
+.card-top-left{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+}
+.card-mini-icon{
+  flex:none;
+  width:21px;height:21px;
+  border-radius:6px;
+  background:rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+  overflow:hidden;
+}
+.card-mini-icon svg{width:12px;height:12px;}
+.card-mini-icon img{width:100%;height:100%;object-fit:cover;}
 .catalog-no{
   font-family:var(--font-mono);
   font-size:10.5px;
@@ -262,21 +279,8 @@ h1{
 .star-btn svg{width:17px;height:17px;}
 
 .card-body{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
+  min-width:0;
 }
-.card-icon{
-  flex:none;
-  width:34px;height:34px;
-  border-radius:9px;
-  background:rgba(255,255,255,0.08);
-  display:flex;align-items:center;justify-content:center;
-  color:var(--accent);
-  overflow:hidden;
-}
-.card-icon svg{width:18px;height:18px;}
-.card-icon img{width:100%;height:100%;object-fit:cover;}
 
 .card-folder{
   display:inline-flex;
@@ -1146,35 +1150,22 @@ function buildCard(item){
 
   const top = document.createElement('div');
   top.className = 'card-top';
-  const cat = document.createElement('span');
-  cat.className = 'catalog-no';
-  cat.textContent = item.catalogNo || '';
-  const starBtn = document.createElement('button');
-  starBtn.className = 'star-btn';
-  starBtn.innerHTML = ICONS.star(!!item.favorite);
-  starBtn.addEventListener('click', async ()=>{
-    const newFav = !item.favorite;
-    const ok = await updateItemRemote(item.id, { favorite:newFav });
-    if(ok){ item.favorite = newFav; renderCards(); }
-  });
-  top.appendChild(cat);
-  top.appendChild(starBtn);
 
-  const body = document.createElement('div');
-  body.className = 'card-body';
+  const topLeft = document.createElement('div');
+  topLeft.className = 'card-top-left';
 
-  const iconWrap = document.createElement('div');
-  iconWrap.className = 'card-icon';
+  const miniIcon = document.createElement('div');
+  miniIcon.className = 'card-mini-icon';
   if(item.type === 'youtube'){
     const ytId = getYouTubeId(item.url);
     if(ytId){
       const img = document.createElement('img');
       img.src = 'https://img.youtube.com/vi/' + ytId + '/mqdefault.jpg';
       img.alt = '';
-      img.onerror = ()=>{ iconWrap.innerHTML = meta.icon; };
-      iconWrap.appendChild(img);
+      img.onerror = ()=>{ miniIcon.innerHTML = meta.icon; };
+      miniIcon.appendChild(img);
     } else {
-      iconWrap.innerHTML = meta.icon;
+      miniIcon.innerHTML = meta.icon;
     }
   } else if(item.type === 'article'){
     const host = getHostname(item.url);
@@ -1183,19 +1174,36 @@ function buildCard(item){
       img.src = 'https://www.google.com/s2/favicons?sz=64&domain=' + encodeURIComponent(host);
       img.alt = '';
       img.style.objectFit = 'contain';
-      img.style.padding = '9px';
-      img.onerror = ()=>{ iconWrap.innerHTML = meta.icon; };
-      iconWrap.appendChild(img);
+      img.style.padding = '4px';
+      img.onerror = ()=>{ miniIcon.innerHTML = meta.icon; };
+      miniIcon.appendChild(img);
     } else {
-      iconWrap.innerHTML = meta.icon;
+      miniIcon.innerHTML = meta.icon;
     }
   } else {
-    iconWrap.innerHTML = meta.icon;
+    miniIcon.innerHTML = meta.icon;
   }
 
-  const textWrap = document.createElement('div');
-  textWrap.style.flex = '1';
-  textWrap.style.minWidth = '0';
+  const cat = document.createElement('span');
+  cat.className = 'catalog-no';
+  cat.textContent = item.catalogNo || '';
+
+  topLeft.appendChild(miniIcon);
+  topLeft.appendChild(cat);
+
+  const starBtn = document.createElement('button');
+  starBtn.className = 'star-btn';
+  starBtn.innerHTML = ICONS.star(!!item.favorite);
+  starBtn.addEventListener('click', async ()=>{
+    const newFav = !item.favorite;
+    const ok = await updateItemRemote(item.id, { favorite:newFav });
+    if(ok){ item.favorite = newFav; renderCards(); }
+  });
+  top.appendChild(topLeft);
+  top.appendChild(starBtn);
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
 
   if(item.collection){
     const folderTag = document.createElement('div');
@@ -1207,19 +1215,19 @@ function buildCard(item){
     fLabel.textContent = item.collection;
     folderTag.appendChild(fIcon);
     folderTag.appendChild(fLabel);
-    textWrap.appendChild(folderTag);
+    body.appendChild(folderTag);
   }
 
   const title = document.createElement('h3');
   title.className = 'card-title';
   title.textContent = item.title;
-  textWrap.appendChild(title);
+  body.appendChild(title);
 
   if(item.notes){
     const notes = document.createElement('p');
     notes.className = 'card-notes';
     notes.textContent = item.notes;
-    textWrap.appendChild(notes);
+    body.appendChild(notes);
   }
 
   if(item.tags && item.tags.length){
@@ -1231,11 +1239,8 @@ function buildCard(item){
       chip.textContent = '#' + t;
       tagsWrap.appendChild(chip);
     });
-    textWrap.appendChild(tagsWrap);
+    body.appendChild(tagsWrap);
   }
-
-  body.appendChild(iconWrap);
-  body.appendChild(textWrap);
 
   const actions = document.createElement('div');
   actions.className = 'card-actions';
@@ -1257,6 +1262,7 @@ function buildCard(item){
   actions.appendChild(openBtn);
   actions.appendChild(editBtn);
   actions.appendChild(delBtn);
+
 
   const player = document.createElement('div');
   player.className = 'card-player';
