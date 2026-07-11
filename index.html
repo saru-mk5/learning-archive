@@ -123,37 +123,47 @@ h1{
 .tab[data-type="youtube"].active{background:var(--youtube);}
 .tab[data-type="article"].active{background:var(--article);}
 
-/* ---------- chip rows (folders / tags) ---------- */
-.chip-row{
-  display:flex;
-  gap:6px;
-  overflow-x:auto;
-  scrollbar-width:none;
-  margin-bottom:8px;
-}
-.chip-row::-webkit-scrollbar{display:none;}
-.chip-row[hidden]{display:none;}
-.chip{
-  flex:none;
+/* ---------- dropdown rows (sort / folder / tag) ---------- */
+.dropdown-row{
   display:flex;
   align-items:center;
-  gap:5px;
+  gap:8px;
+  margin-bottom:14px;
+}
+.dropdown-row[hidden]{display:none;}
+.dropdown-label{
+  flex:none;
   font-family:var(--font-mono);
-  font-size:11.5px;
+  font-size:11px;
   color:var(--muted);
-  background:transparent;
+}
+.select-wrap{
+  position:relative;
+  flex:1;
+}
+.select-wrap select{
+  width:100%;
+  appearance:none;
+  -webkit-appearance:none;
+  background:rgba(255,255,255,0.06);
   border:1px solid var(--line);
   border-radius:999px;
-  padding:5px 10px;
+  color:var(--ink-light);
+  font-family:var(--font-body);
+  font-size:12.5px;
+  padding:7px 30px 7px 14px;
   cursor:pointer;
-  white-space:nowrap;
-  transition:all .15s ease;
 }
-.chip svg{width:12px;height:12px;flex:none;}
-.chip.active{
-  color:var(--on-accent);
-  background:var(--ink-light);
-  border-color:transparent;
+.select-wrap select:focus{border-color:var(--ink-light);}
+.select-wrap svg{
+  position:absolute;
+  right:11px;
+  top:50%;
+  transform:translateY(-50%);
+  width:12px;
+  height:12px;
+  color:var(--muted);
+  pointer-events:none;
 }
 
 .secondary-filters{
@@ -162,7 +172,7 @@ h1{
   gap:8px;
   margin-bottom:18px;
 }
-.secondary-filters .chip-row{flex:1;margin-bottom:0;}
+.secondary-filters .select-wrap{flex:1;}
 .fav-toggle{
   flex:none;
   display:flex;
@@ -183,47 +193,6 @@ h1{
   color:var(--on-accent);
   background:var(--ink-light);
   border-color:transparent;
-}
-
-.sort-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:16px;
-}
-.sort-label{
-  flex:none;
-  font-family:var(--font-mono);
-  font-size:11px;
-  color:var(--muted);
-}
-.sort-select-wrap{
-  position:relative;
-  flex:1;
-}
-.sort-select-wrap select{
-  width:100%;
-  appearance:none;
-  -webkit-appearance:none;
-  background:rgba(255,255,255,0.06);
-  border:1px solid var(--line);
-  border-radius:999px;
-  color:var(--ink-light);
-  font-family:var(--font-body);
-  font-size:12.5px;
-  padding:7px 30px 7px 14px;
-  cursor:pointer;
-}
-.sort-select-wrap select:focus{border-color:var(--ink-light);}
-.sort-select-wrap svg{
-  position:absolute;
-  right:11px;
-  top:50%;
-  transform:translateY(-50%);
-  width:12px;
-  height:12px;
-  color:var(--muted);
-  pointer-events:none;
 }
 
 /* ---------- cards ---------- */
@@ -654,6 +623,11 @@ h1{
   gap:8px;
   margin:-4px 0 14px;
 }
+.user-row-actions{
+  flex:none;
+  display:flex;
+  gap:6px;
+}
 .user-email{
   font-family:var(--font-mono);
   font-size:11px;
@@ -700,7 +674,10 @@ h1{
   <h1>MY LEARNING ARCHIVE</h1>
   <div class="user-row">
     <span class="user-email" id="userEmail"></span>
-    <button class="logout-btn" id="logoutBtn" type="button">ログアウト</button>
+    <div class="user-row-actions">
+      <button class="logout-btn" id="accountBtn" type="button">アカウント設定</button>
+      <button class="logout-btn" id="logoutBtn" type="button">ログアウト</button>
+    </div>
   </div>
   <p class="stat-line" id="statLine">全 0 件</p>
 
@@ -717,19 +694,32 @@ h1{
     <button class="tab" data-type="article">記事・サイト</button>
   </nav>
 
-  <div class="chip-row" id="folderRow" hidden></div>
+  <div class="dropdown-row" id="folderRowWrap" hidden>
+    <span class="dropdown-label">フォルダ</span>
+    <div class="select-wrap">
+      <select id="folderSelect">
+        <option value="">指定なし</option>
+      </select>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
 
   <div class="secondary-filters">
-    <div class="chip-row" id="tagRow"></div>
+    <div class="select-wrap">
+      <select id="tagSelect">
+        <option value="">タグ：指定なし</option>
+      </select>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
     <button class="fav-toggle" id="favToggle">
       <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"><path d="M12 3.5 L14.7 9.1 L21 10 L16.5 14.2 L17.6 20.4 L12 17.3 L6.4 20.4 L7.5 14.2 L3 10 L9.3 9.1 Z"/></svg>
       お気に入り
     </button>
   </div>
 
-  <div class="sort-row">
-    <span class="sort-label">並び替え</span>
-    <div class="sort-select-wrap">
+  <div class="dropdown-row">
+    <span class="dropdown-label">並び替え</span>
+    <div class="select-wrap">
       <select id="sortSelect">
         <option value="createdAt-desc">追加日が新しい順</option>
         <option value="createdAt-asc">追加日が古い順</option>
@@ -794,6 +784,27 @@ h1{
         <button id="resetYes" style="background:var(--danger);color:#fff;">削除する</button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="accountOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>アカウント設定</h2>
+
+    <label>新しいメールアドレス
+      <input type="email" id="newEmailField" placeholder="new@example.com">
+    </label>
+    <p class="auth-message" id="emailUpdateMsg"></p>
+    <button class="btn-primary" id="updateEmailBtn" type="button" style="width:100%;margin-bottom:22px;">メールアドレスを変更</button>
+
+    <label>新しいパスワード
+      <input type="password" id="newPasswordField" placeholder="6文字以上" autocomplete="new-password">
+    </label>
+    <p class="auth-message" id="passwordUpdateMsg"></p>
+    <button class="btn-primary" id="updatePasswordBtn" type="button" style="width:100%;">パスワードを変更</button>
+
+    <button class="btn-secondary" id="accountCloseBtn" type="button" style="width:100%;margin-top:22px;">閉じる</button>
   </div>
 </div>
 
@@ -984,48 +995,41 @@ function getAllCollections(scopeType){
 }
 
 function renderTagRow(){
-  const row = document.getElementById('tagRow');
-  row.innerHTML = '';
+  const select = document.getElementById('tagSelect');
   const tags = getAllTags(filterType);
   if(tags.indexOf(filterTag) === -1) filterTag = null;
+  select.innerHTML = '';
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = '';
+  defaultOpt.textContent = 'タグ：指定なし';
+  select.appendChild(defaultOpt);
   tags.forEach(tag=>{
-    const btn = document.createElement('button');
-    btn.className = 'chip' + (filterTag === tag ? ' active' : '');
-    const label = document.createElement('span');
-    label.textContent = '#' + tag;
-    btn.appendChild(label);
-    btn.addEventListener('click', ()=>{
-      filterTag = (filterTag === tag) ? null : tag;
-      renderTagRow();
-      renderCards();
-    });
-    row.appendChild(btn);
+    const opt = document.createElement('option');
+    opt.value = tag;
+    opt.textContent = '#' + tag;
+    select.appendChild(opt);
   });
+  select.value = filterTag || '';
 }
 
 function renderFolderRow(){
-  const row = document.getElementById('folderRow');
-  row.innerHTML = '';
+  const wrap = document.getElementById('folderRowWrap');
+  const select = document.getElementById('folderSelect');
   const cols = getAllCollections(filterType);
   if(cols.indexOf(filterCollection) === -1) filterCollection = null;
-  row.hidden = cols.length === 0;
+  wrap.hidden = cols.length === 0;
+  select.innerHTML = '';
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = '';
+  defaultOpt.textContent = '指定なし';
+  select.appendChild(defaultOpt);
   cols.forEach(name=>{
-    const btn = document.createElement('button');
-    btn.className = 'chip' + (filterCollection === name ? ' active' : '');
-    const iconSpan = document.createElement('span');
-    iconSpan.innerHTML = ICONS.folder;
-    iconSpan.style.display = 'inline-flex';
-    const label = document.createElement('span');
-    label.textContent = name;
-    btn.appendChild(iconSpan);
-    btn.appendChild(label);
-    btn.addEventListener('click', ()=>{
-      filterCollection = (filterCollection === name) ? null : name;
-      renderFolderRow();
-      renderCards();
-    });
-    row.appendChild(btn);
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
   });
+  select.value = filterCollection || '';
 }
 
 function getFilteredItems(){
@@ -1430,6 +1434,16 @@ document.getElementById('sortSelect').addEventListener('change', (e)=>{
   renderCards();
 });
 
+document.getElementById('folderSelect').addEventListener('change', (e)=>{
+  filterCollection = e.target.value || null;
+  renderCards();
+});
+
+document.getElementById('tagSelect').addEventListener('change', (e)=>{
+  filterTag = e.target.value || null;
+  renderCards();
+});
+
 /* ---------- auth ---------- */
 const authScreen = document.getElementById('authScreen');
 const appRoot = document.getElementById('appRoot');
@@ -1484,6 +1498,57 @@ document.getElementById('logoutBtn').addEventListener('click', async ()=>{
   await sb.auth.signOut();
 });
 
+/* ---------- account settings ---------- */
+const accountOverlay = document.getElementById('accountOverlay');
+document.getElementById('accountBtn').addEventListener('click', ()=>{
+  document.getElementById('newEmailField').value = '';
+  document.getElementById('newPasswordField').value = '';
+  document.getElementById('emailUpdateMsg').textContent = '';
+  document.getElementById('passwordUpdateMsg').textContent = '';
+  accountOverlay.classList.add('open');
+});
+document.getElementById('accountCloseBtn').addEventListener('click', ()=>{
+  accountOverlay.classList.remove('open');
+});
+accountOverlay.addEventListener('click', (e)=>{ if(e.target === accountOverlay) accountOverlay.classList.remove('open'); });
+
+document.getElementById('updateEmailBtn').addEventListener('click', async ()=>{
+  const newEmail = document.getElementById('newEmailField').value.trim();
+  const msgEl = document.getElementById('emailUpdateMsg');
+  msgEl.classList.remove('info');
+  if(!newEmail){
+    msgEl.textContent = 'メールアドレスを入力してください';
+    return;
+  }
+  try{
+    const { error } = await sb.auth.updateUser({ email:newEmail });
+    if(error) throw error;
+    msgEl.textContent = '確認メールを送信しました。新しいメール内のリンクをクリックすると変更が完了します。';
+    msgEl.classList.add('info');
+  }catch(e){
+    msgEl.textContent = e.message || 'エラーが発生しました';
+  }
+});
+
+document.getElementById('updatePasswordBtn').addEventListener('click', async ()=>{
+  const newPassword = document.getElementById('newPasswordField').value;
+  const msgEl = document.getElementById('passwordUpdateMsg');
+  msgEl.classList.remove('info');
+  if(!newPassword || newPassword.length < 6){
+    msgEl.textContent = '6文字以上のパスワードを入力してください';
+    return;
+  }
+  try{
+    const { error } = await sb.auth.updateUser({ password:newPassword });
+    if(error) throw error;
+    msgEl.textContent = 'パスワードを変更しました。';
+    msgEl.classList.add('info');
+    document.getElementById('newPasswordField').value = '';
+  }catch(e){
+    msgEl.textContent = e.message || 'エラーが発生しました';
+  }
+});
+
 async function showLoggedIn(session){
   currentUserId = session.user.id;
   document.getElementById('userEmail').textContent = session.user.email || '';
@@ -1504,6 +1569,7 @@ function showLoggedOut(){
   appData.items = [];
   appRoot.hidden = true;
   document.getElementById('addBtn').hidden = true;
+  document.getElementById('accountOverlay').classList.remove('open');
   authScreen.hidden = false;
   authEmail.value = '';
   authPassword.value = '';
