@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>MY LEARNING ARCHIVE</title>
+<title>LDM LEARNING ARCHIVE</title>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="favicon-16.png" type="image/png" sizes="16x16">
@@ -29,6 +29,7 @@
   --video:#C7C7CC;
   --youtube:#9A9A9E;
   --article:#6E6E73;
+  --x:#5C5C61;
 
   --radius-card:14px;
   --font-mono:'JetBrains Mono',monospace;
@@ -128,6 +129,7 @@ h1{
 .tab[data-type="video"].active{background:var(--video);}
 .tab[data-type="youtube"].active{background:var(--youtube);}
 .tab[data-type="article"].active{background:var(--article);}
+.tab[data-type="x"].active{background:var(--x);}
 
 /* ---------- dropdown rows (sort / folder / tag) ---------- */
 .dropdown-row{
@@ -205,7 +207,7 @@ h1{
 .card-list{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:9px;
 }
 .empty-state{
   color:var(--muted);
@@ -220,7 +222,7 @@ h1{
   color:var(--ink-light);
   border:1px solid var(--line);
   border-radius:var(--radius-card);
-  padding:14px 14px 12px;
+  padding:11px 13px 9px;
   animation:cardIn .35s ease both;
 }
 @keyframes cardIn{
@@ -236,16 +238,16 @@ h1{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-  margin-bottom:8px;
+  margin-bottom:5px;
 }
 .catalog-no{
   font-family:var(--font-mono);
-  font-size:11px;
+  font-size:10.5px;
   letter-spacing:.03em;
   border:1px dashed var(--accent);
   color:var(--accent);
   border-radius:5px;
-  padding:2px 7px;
+  padding:1px 6px;
   transform:rotate(-1.4deg);
   display:inline-block;
 }
@@ -257,23 +259,23 @@ h1{
   color:var(--accent);
   line-height:0;
 }
-.star-btn svg{width:19px;height:19px;}
+.star-btn svg{width:17px;height:17px;}
 
 .card-body{
   display:flex;
-  gap:12px;
+  gap:10px;
   align-items:flex-start;
 }
 .card-icon{
   flex:none;
-  width:42px;height:42px;
-  border-radius:10px;
+  width:34px;height:34px;
+  border-radius:9px;
   background:rgba(255,255,255,0.08);
   display:flex;align-items:center;justify-content:center;
   color:var(--accent);
   overflow:hidden;
 }
-.card-icon svg{width:22px;height:22px;}
+.card-icon svg{width:18px;height:18px;}
 .card-icon img{width:100%;height:100%;object-fit:cover;}
 
 .card-folder{
@@ -281,53 +283,53 @@ h1{
   align-items:center;
   gap:4px;
   font-family:var(--font-mono);
-  font-size:10.5px;
+  font-size:10px;
   color:var(--muted);
-  margin-bottom:4px;
+  margin-bottom:2px;
 }
-.card-folder svg{width:11px;height:11px;}
+.card-folder svg{width:10px;height:10px;}
 
 .card-title{
-  font-size:15px;
+  font-size:14px;
   font-weight:700;
-  margin:0 0 4px;
-  line-height:1.4;
+  margin:0 0 2px;
+  line-height:1.35;
 }
 .card-notes{
-  font-size:12.5px;
+  font-size:12px;
   color:var(--muted);
-  margin:0 0 6px;
-  line-height:1.6;
+  margin:0 0 4px;
+  line-height:1.5;
 }
 .card-tags{
   display:flex;
   flex-wrap:wrap;
-  gap:5px;
+  gap:4px;
 }
 .card-tag{
   font-family:var(--font-mono);
-  font-size:10.5px;
+  font-size:10px;
   background:rgba(255,255,255,0.08);
   border-radius:999px;
-  padding:3px 8px;
+  padding:2px 7px;
   color:var(--muted);
 }
 
 .card-actions{
   display:flex;
-  gap:8px;
-  margin-top:11px;
+  gap:7px;
+  margin-top:8px;
   border-top:1px solid var(--line);
-  padding-top:10px;
+  padding-top:8px;
 }
 .card-actions button{
   font-family:var(--font-body);
-  font-size:12.5px;
+  font-size:12px;
   border:none;
   cursor:pointer;
   border-radius:8px;
   display:flex;align-items:center;gap:5px;
-  padding:7px 10px;
+  padding:6px 10px;
 }
 .open-btn{
   background:var(--accent);
@@ -455,6 +457,7 @@ h1{
 .type-select button[data-type="video"].active{background:var(--video);}
 .type-select button[data-type="youtube"].active{background:var(--youtube);}
 .type-select button[data-type="article"].active{background:var(--article);}
+.type-select button[data-type="x"].active{background:var(--x);}
 
 .sheet label{
   display:block;
@@ -659,7 +662,7 @@ h1{
 
 <div class="auth-screen" id="authScreen">
   <div class="auth-card">
-    <h1>MY LEARNING ARCHIVE</h1>
+    <h1>LDM LEARNING ARCHIVE</h1>
     <p class="auth-sub">ログインしてライブラリにアクセス</p>
     <div class="auth-tabs" id="authTabs">
       <button class="auth-tab active" data-mode="signin" type="button">ログイン</button>
@@ -677,7 +680,7 @@ h1{
 </div>
 
 <div class="app" id="appRoot" hidden>
-  <h1>MY LEARNING ARCHIVE</h1>
+  <h1>LDM LEARNING ARCHIVE</h1>
   <div class="user-row">
     <span class="user-email" id="userEmail"></span>
     <div class="user-row-actions">
@@ -698,6 +701,7 @@ h1{
     <button class="tab" data-type="video">動画</button>
     <button class="tab" data-type="youtube">YouTube</button>
     <button class="tab" data-type="article">記事・サイト</button>
+    <button class="tab" data-type="x">X</button>
   </nav>
 
   <div class="dropdown-row" id="folderRowWrap" hidden>
@@ -755,6 +759,7 @@ h1{
       <button data-type="video" type="button"></button>
       <button data-type="youtube" type="button"></button>
       <button data-type="article" type="button"></button>
+      <button data-type="x" type="button"></button>
     </div>
 
     <label>タイトル
@@ -834,6 +839,7 @@ const ICONS = {
   video:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.4 L4.2 5.4 L20 5.4 L21 9.4 Z"/><rect x="3" y="9.4" width="18" height="9.2" rx="1"/><line x1="7" y1="5.6" x2="9" y2="9.2"/><line x1="12" y1="5.5" x2="14" y2="9.2"/><line x1="17" y1="5.5" x2="19" y2="9.2"/></svg>',
   youtube:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 8.6 L15.6 12 L10 15.4 Z" fill="currentColor" stroke="none"/></svg>',
   article:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 H18 V20.5 L12 16.5 L6 20.5 Z"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>',
   folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.5 A1 1 0 0 1 4.5 5.5 H9 L10.5 7.5 H19.5 A1 1 0 0 1 20.5 8.5 V17.5 A1 1 0 0 1 19.5 18.5 H4.5 A1 1 0 0 1 3.5 17.5 Z"/></svg>',
   star:(filled)=>'<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="'+(filled?'currentColor':'none')+'"><path d="M12 3.5 L14.7 9.1 L21 10 L16.5 14.2 L17.6 20.4 L12 17.3 L6.4 20.4 L7.5 14.2 L3 10 L9.3 9.1 Z"/></svg>',
   play:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5 L18.5 12 L8 18.5 Z" fill="currentColor" stroke="none"/></svg>',
@@ -845,7 +851,8 @@ const TYPE_META = {
   audio:{label:'オーディオ', accent:'var(--audio)', prefix:'A', icon:ICONS.audio},
   video:{label:'動画', accent:'var(--video)', prefix:'V', icon:ICONS.video},
   youtube:{label:'YouTube', accent:'var(--youtube)', prefix:'Y', icon:ICONS.youtube},
-  article:{label:'記事・サイト', accent:'var(--article)', prefix:'S', icon:ICONS.article}
+  article:{label:'記事・サイト', accent:'var(--article)', prefix:'S', icon:ICONS.article},
+  x:{label:'X（旧Twitter）', accent:'var(--x)', prefix:'X', icon:ICONS.x}
 };
 
 /* ---------- state ---------- */
