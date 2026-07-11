@@ -76,9 +76,10 @@ h1{
   padding:10px 12px;
   margin-bottom:16px;
 }
-.search-row svg{flex:none;color:var(--muted);}
+.search-row svg{flex:none;color:var(--muted);width:18px;height:18px;}
 .search-row input{
   flex:1;
+  min-width:0;
   background:none;
   border:none;
   outline:none;
@@ -182,6 +183,47 @@ h1{
   color:var(--on-accent);
   background:var(--ink-light);
   border-color:transparent;
+}
+
+.sort-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:16px;
+}
+.sort-label{
+  flex:none;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--muted);
+}
+.sort-select-wrap{
+  position:relative;
+  flex:1;
+}
+.sort-select-wrap select{
+  width:100%;
+  appearance:none;
+  -webkit-appearance:none;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--ink-light);
+  font-family:var(--font-body);
+  font-size:12.5px;
+  padding:7px 30px 7px 14px;
+  cursor:pointer;
+}
+.sort-select-wrap select:focus{border-color:var(--ink-light);}
+.sort-select-wrap svg{
+  position:absolute;
+  right:11px;
+  top:50%;
+  transform:translateY(-50%);
+  width:12px;
+  height:12px;
+  color:var(--muted);
+  pointer-events:none;
 }
 
 /* ---------- cards ---------- */
@@ -379,6 +421,7 @@ h1{
 }
 .fab:active{transform:translateX(calc(-50% + 190px)) scale(.92);}
 .fab svg{width:24px;height:24px;}
+.fab[hidden]{display:none;}
 @media (max-width:480px){
   .fab{left:auto;right:22px;transform:none;}
   .fab:active{transform:scale(.92);}
@@ -684,6 +727,19 @@ h1{
     </button>
   </div>
 
+  <div class="sort-row">
+    <span class="sort-label">並び替え</span>
+    <div class="sort-select-wrap">
+      <select id="sortSelect">
+        <option value="createdAt-desc">追加日が新しい順</option>
+        <option value="createdAt-asc">追加日が古い順</option>
+        <option value="title-asc">名前（あ→ん / A→Z）</option>
+        <option value="title-desc">名前（ん→あ / Z→A）</option>
+      </select>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+
   <main class="card-list" id="cardList"></main>
   <p class="empty-state" id="emptyState" hidden></p>
 </div>
@@ -783,6 +839,8 @@ let filterFavOnly = false;
 let searchQuery = '';
 let selectedType = 'audio';
 let editingId = null;
+let sortBy = 'createdAt';
+let sortOrder = 'desc';
 
 /* ---------- data layer (Supabase) ---------- */
 function rowToItem(row){
@@ -983,7 +1041,15 @@ function getFilteredItems(){
       if(!inTitle && !inTags) return false;
     }
     return true;
-  }).sort((a,b)=> b.createdAt - a.createdAt);
+  }).sort((a,b)=>{
+    let cmp;
+    if(sortBy === 'title'){
+      cmp = a.title.localeCompare(b.title, 'ja');
+    } else {
+      cmp = a.createdAt - b.createdAt;
+    }
+    return sortOrder === 'asc' ? cmp : -cmp;
+  });
 }
 
 function renderStatLine(){
@@ -1187,10 +1253,17 @@ function togglePlayer(item, playerEl){
 
   const driveId = getDriveId(item.url);
   if(driveId){
-    const iframe = document.createElement('iframe');
-    iframe.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
-    iframe.allow = 'autoplay';
-    playerEl.appendChild(iframe);
+    const directUrl = 'https://drive.google.com/uc?export=download&id=' + driveId;
+    const tag = document.createElement(item.type === 'video' ? 'video' : 'audio');
+    tag.controls = true;
+    tag.autoplay = true;
+    tag.src = directUrl;
+    tag.onerror = ()=>{
+      playerEl.innerHTML = '';
+      playerEl.hidden = true;
+      window.open(item.url, '_blank', 'noopener');
+    };
+    playerEl.appendChild(tag);
     playerEl.hidden = false;
     return;
   }
@@ -1350,6 +1423,13 @@ document.getElementById('searchInput').addEventListener('input', (e)=>{
   renderCards();
 });
 
+document.getElementById('sortSelect').addEventListener('change', (e)=>{
+  const [field, order] = e.target.value.split('-');
+  sortBy = field;
+  sortOrder = order;
+  renderCards();
+});
+
 /* ---------- auth ---------- */
 const authScreen = document.getElementById('authScreen');
 const appRoot = document.getElementById('appRoot');
@@ -1410,6 +1490,9 @@ async function showLoggedIn(session){
   authScreen.hidden = true;
   appRoot.hidden = false;
   document.getElementById('addBtn').hidden = false;
+  document.getElementById('statLine').textContent = '読み込み中...';
+  document.getElementById('cardList').innerHTML = '';
+  document.getElementById('emptyState').hidden = true;
   await loadData();
   renderTagRow();
   renderFolderRow();
